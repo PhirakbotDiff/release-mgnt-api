@@ -1,5 +1,5 @@
 from fastapi import Depends, APIRouter, HTTPException
-from app.schemas import DeployRequest, DeployResponse
+from app.schemas.schemas import DeployRequest, DeployResponse
 from app.auth.security import get_current_user
 from app.services.git_service import GitService
 from app.services.manifest_service import ManifestService
