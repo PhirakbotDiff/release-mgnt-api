@@ -4,7 +4,17 @@ from app.api.deploy import router as deploy_router
 from app.api.auth import router as auth_router
 from app.api.users import router as user_router
 
-app = FastAPI(title="Release Service")
+app = FastAPI(
+    title="Release Service",
+    description="A detailed description with **Markdown** support",
+    version="1.0.0",
+    docs_url="/documentation",
+    swagger_ui_parameters={
+        "docExpansion": "none",          # Collapse all sections by default
+        "defaultModelsExpandDepth": -1,  # Hide models section
+        "syntaxHighlight": False,        # Disable syntax highlighting
+    }
+)
 
 # Add this block
 app.add_middleware(

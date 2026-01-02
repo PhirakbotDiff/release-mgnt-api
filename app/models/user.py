@@ -11,6 +11,7 @@ class User(Base):
     firstname = Column(String, nullable=True)
     lastname = Column(String, nullable=True)
     email = Column(String, unique=True, nullable=True)
+    bio = Column(String, nullable=True)
     role = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
