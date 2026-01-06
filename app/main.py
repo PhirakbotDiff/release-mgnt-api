@@ -5,6 +5,7 @@ from app.api.auth import router as auth_router
 from app.api.users import router as user_router
 from app.api.service import router as service_router
 from app.api.environment import router as environment_router
+from app.api.dashboard import router as dashboard_router
 
 app = FastAPI(
     title="Release Service",
@@ -32,3 +33,4 @@ app.include_router(auth_router)
 app.include_router(user_router)
 app.include_router(service_router)
 app.include_router(environment_router)
+app.include_router(dashboard_router)

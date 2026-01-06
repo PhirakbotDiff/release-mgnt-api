@@ -16,6 +16,7 @@ class Deployment(Base):
     commit_id = Column(String, nullable=True)
     error_message = Column(Text, nullable=True)
 
+    description = Column(Text, nullable=True)
     # namespace = Column(Text, nullable=True)
     # cluster = Column(Text, nullable=True)
 
