@@ -1,13 +1,15 @@
-import yaml
+import yaml # type: ignore
 from pathlib import Path
 
-ALLOWED_BASE_PATH = "apps"
+ALLOWED_BASE_PATH = "./manifest-repo/charts"
 
 class ManifestService:
 
-    def update_image_tag(self, service: str, env: str, tag: str):
+    def update_image_tag(self, manifest_repo_path: str, service: str, env: str, tag: str):
+
+        repo_root = Path(manifest_repo_path)
         file_path = Path(
-            f"{ALLOWED_BASE_PATH}/{service}/{env}/values.yaml"
+            f"{repo_root}/charts/{service}/values.yaml"
         )
 
         if not file_path.exists():
@@ -15,7 +17,7 @@ class ManifestService:
 
         with open(file_path) as f:
             data = yaml.safe_load(f)
-
+        
         if "image" not in data:
             raise ValueError("Invalid manifest structure")
 

@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.deploy import router as deploy_router
 from app.api.auth import router as auth_router
 from app.api.users import router as user_router
+from app.api.service import router as service_router
+from app.api.environment import router as environment_router
 
 app = FastAPI(
     title="Release Service",
@@ -28,3 +30,5 @@ app.add_middleware(
 app.include_router(deploy_router)
 app.include_router(auth_router)
 app.include_router(user_router)
+app.include_router(service_router)
+app.include_router(environment_router)
