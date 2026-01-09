@@ -1,5 +1,5 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI # type: ignore
+from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from app.api.deploy import router as deploy_router
 from app.api.auth import router as auth_router
 from app.api.users import router as user_router

@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException, status # type: ignore
+from sqlalchemy.orm import Session # type: ignore
 from app.auth.security import get_current_user, get_db
 from app.models.user import User
 from app.schemas.dashboard import DashboardStats

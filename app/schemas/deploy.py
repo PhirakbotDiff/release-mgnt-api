@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, constr, ConfigDict, model_serializer
+from pydantic import BaseModel, Field, constr, ConfigDict, model_serializer # type: ignore
 from typing import Literal, Dict
 
 class DeployRequest(BaseModel):

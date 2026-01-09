@@ -1,7 +1,7 @@
 from fastapi import Depends, APIRouter, HTTPException, BackgroundTasks # type: ignore
-from app.schemas.deploy import DeployRequest, Deploy
+from app.schemas.deploy import DeployRequest, Deploy, DeployResponse
 from app.auth.security import get_current_user, get_db
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session # type: ignore
 from app.models.deploy import Deployment as DeploymentModel
 from app.models.user import User
 from app.utils.bgtask import run_deploy_job
@@ -21,7 +21,7 @@ async def deploy(
     try:
 
         # 1️⃣ Insert deployment record
-        deployment = Deployment(
+        deployment = DeploymentModel(
             service=req.service,
             environment=req.environment,
             image_tag=req.image_tag,
