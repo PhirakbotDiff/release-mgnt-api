@@ -5,32 +5,39 @@ from app.auth.auth import get_password_hash
 db = SessionLocal()
 
 services_data = [
+    # {
+    #     "name": "SFA Admin Portal",
+    #     "slug": "sfa-admin-service",
+    #     "description": "Administrative interface for Sales Force Automation management.",
+    #     "manifest_path": "charts/sfa-admin-service",
+    #     "gitlab_url": "https://gitscm.vattanacbrewery.com/devops/manifest_repo.git"
+    # },
+    # {
+    #     "name": "SFA Salesperson App",
+    #     "slug": "sfa-salesperson-service",
+    #     "description": "Backend services for the salesperson mobile application.",
+    #     "manifest_path": "charts/sfa-salesperson-service",
+    #     "gitlab_url": "https://gitscm.vattanacbrewery.com/devops/manifest_repo.git"
+    # },
+    # {
+    #     "name": "SFA DP Service",
+    #     "slug": "sfa-dp-service",
+    #     "description": "Data Processing and distribution services for SFA modules.",
+    #     "manifest_path": "charts/sfa-dp-service",
+    #     "gitlab_url": "https://gitscm.vattanacbrewery.com/devops/manifest_repo.git"
+    # },
+    # {
+    #     "name": "Telegram Notification Service",
+    #     "slug": "telegram-service",
+    #     "description": "Internal bot service for automated alerts and notifications via Telegram.",
+    #     "manifest_path": "charts/telegram-service",
+    #     "gitlab_url": "https://gitscm.vattanacbrewery.com/devops/manifest_repo.git"
+    # },
     {
-        "name": "SFA Admin Portal",
-        "slug": "sfa-admin-service",
-        "description": "Administrative interface for Sales Force Automation management.",
-        "manifest_path": "charts/sfa-admin-service",
-        "gitlab_url": "https://gitscm.vattanacbrewery.com/devops/manifest_repo.git"
-    },
-    {
-        "name": "SFA Salesperson App",
-        "slug": "sfa-salesperson-service",
-        "description": "Backend services for the salesperson mobile application.",
-        "manifest_path": "charts/sfa-salesperson-service",
-        "gitlab_url": "https://gitscm.vattanacbrewery.com/devops/manifest_repo.git"
-    },
-    {
-        "name": "SFA DP Service",
-        "slug": "sfa-dp-service",
-        "description": "Data Processing and distribution services for SFA modules.",
-        "manifest_path": "charts/sfa-dp-service",
-        "gitlab_url": "https://gitscm.vattanacbrewery.com/devops/manifest_repo.git"
-    },
-    {
-        "name": "Telegram Notification Service",
-        "slug": "telegram-service",
+        "name": "Order Service",
+        "slug": "order-service",
         "description": "Internal bot service for automated alerts and notifications via Telegram.",
-        "manifest_path": "charts/telegram-service",
+        "manifest_path": "charts/order-service",
         "gitlab_url": "https://gitscm.vattanacbrewery.com/devops/manifest_repo.git"
     }
 ]

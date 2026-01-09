@@ -11,7 +11,7 @@ from app.utils.bgtask import run_deploy_job
 
 router = APIRouter(prefix="/deploy", tags=["Deploy"])
 
-@router.post("/", response_model=Deploy)
+@router.post("/", response_model=DeployResponse)
 async def deploy(
     req: DeployRequest,
     background_tasks: BackgroundTasks,
@@ -41,16 +41,15 @@ async def deploy(
             deployment.id,
             req.service,
             req.environment,
-            req.image_tag,
-            git_tag=req.git_tag,
-            description=req.description
+            req.image_tag
         )
 
         # 3️⃣ Return immediately
         return DeployResponse(
             status="accepted",
             message="Deployment started",
-            deployment_id=deployment.id
+            deployment_id=deployment.id,
+            id=deployment.id
         )
 
     except Exception as e:

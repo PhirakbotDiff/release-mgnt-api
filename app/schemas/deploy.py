@@ -9,6 +9,7 @@ class DeployRequest(BaseModel):
     description: str
 
 class DeployResponse(BaseModel):
+    id: int | str
     status: str
     message: str
     commit_id: str | None = None

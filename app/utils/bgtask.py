@@ -11,7 +11,7 @@ def run_deploy_job(
     deployment_id: int,
     service: str,
     environment: str,
-    image_tag: str,
+    image_tag: str
 ):
     db = SessionLocal()  # create NEW session
 

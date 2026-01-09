@@ -19,6 +19,7 @@ class ServiceUpdate(ServiceBase):
 # Properties to return to client (includes ID)
 class Service(ServiceBase):
     id: int
+    slug: str
     
     # This allows Pydantic to read data from SQLAlchemy models (ORM)
     model_config = ConfigDict(from_attributes=True)
