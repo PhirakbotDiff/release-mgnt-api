@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy import Column, Integer, String, Text, DateTime
 from app.database import Base  # Assuming Base is defined in your database module
+from datetime import datetime
 
 class Service(Base):
     __tablename__ = "rl_services"
@@ -10,3 +11,7 @@ class Service(Base):
     description = Column(Text)
     manifest_path = Column(String)
     gitlab_url = Column(String)
+
+    created_by = Column(Integer)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
