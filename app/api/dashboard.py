@@ -134,5 +134,5 @@ def top_deployments(db: Session = Depends(get_db)):
             "count": count,
             "percentage": percentage
         })
-    print("result", result)
+    
     return result

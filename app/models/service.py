@@ -12,6 +12,8 @@ class Service(Base):
     manifest_path = Column(String)
     gitlab_url = Column(String)
 
+    namespace = Column(String, nullable=True)
+
     created_by = Column(Integer)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

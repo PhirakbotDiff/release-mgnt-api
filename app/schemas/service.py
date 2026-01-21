@@ -8,6 +8,7 @@ class ServiceBase(BaseModel):
     description: Optional[str] = None
     manifest_path: Optional[str] = None
     gitlab_url: Optional[str] = None
+    namespace: Optional[str] = None
 
 # Properties to receive on service creation
 class ServiceCreate(ServiceBase):
