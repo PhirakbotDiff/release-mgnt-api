@@ -11,7 +11,8 @@ def run_deploy_job(
     deployment_id: int,
     service: str,
     environment: str,
-    image_tag: str
+    image_tag: str,
+    manifest_path: str
 ):
     db = SessionLocal()  # create NEW session
 
@@ -27,7 +28,8 @@ def run_deploy_job(
             git.repo_path,
             service,
             environment,
-            image_tag
+            image_tag,
+            manifest_path # for real charts
         )
 
         commit_id = git.commit_and_push(

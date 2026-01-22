@@ -5,11 +5,18 @@ ALLOWED_BASE_PATH = "./manifest-repo/charts"
 
 class ManifestService:
 
-    def update_image_tag(self, manifest_repo_path: str, service: str, env: str, tag: str):
+    def update_image_tag(
+        self, 
+        manifest_repo_path: str, 
+        service: str, 
+        env: str, 
+        tag: str,
+        manifest_path: str # real manifest charts
+    ):
 
         repo_root = Path(manifest_repo_path)
         file_path = Path(
-            f"{repo_root}/charts/{service}/values.yaml"
+            f"{repo_root}/{manifest_path}/values.yaml"
         )
 
         if not file_path.exists():

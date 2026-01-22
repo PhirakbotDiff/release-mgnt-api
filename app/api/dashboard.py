@@ -66,7 +66,6 @@ def get_dashboard(
         .scalar()
     )
 
-    print("testotl", deployments_this_month, deployments_last_month)
     deployments_pct, deployments_trend = calc_percentage(
         deployments_this_month, deployments_last_month
     )
@@ -122,12 +121,12 @@ def top_deployments(db: Session = Depends(get_db)):
     if not rows:
         return []
 
-    # Use the TOP service as 100%
-    max_count = rows[0].count
+    # ✅ total count, not max
+    total_count = sum(row.count for row in rows)
 
     result = []
     for service, count in rows:
-        percentage = round((count / max_count) * 100, 2)
+        percentage = round((count / total_count) * 100, 2)
 
         result.append({
             "service": service,

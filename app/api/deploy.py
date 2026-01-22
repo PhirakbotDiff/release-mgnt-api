@@ -4,6 +4,7 @@ from app.schemas.paginaiton import PaginatedResponse
 from app.auth.security import get_current_user, get_db
 from sqlalchemy.orm import Session, joinedload # type: ignore
 from app.models.deploy import Deployment as DeploymentModel
+from app.models.service import Service as ServiceModel
 from app.models.user import User
 from app.utils.bgtask import run_deploy_job
 
@@ -36,13 +37,20 @@ async def deploy(
         db.commit()
         db.refresh(deployment)
 
+        # query to get service info
+        service_obj = db.query(ServiceModel) \
+            .filter(ServiceModel.slug == str(req.service)) \
+            .first()
+
+        print("service_obj", service_obj)
         # 2️⃣ Run deployment in background
         background_tasks.add_task(
             run_deploy_job,
             deployment.id,
             req.service,
             req.environment,
-            req.image_tag
+            req.image_tag,
+            service_obj.manifest_path,
         )
 
         # 3️⃣ Return immediately
@@ -153,8 +161,8 @@ def get_deployment_by_id(
         "status": deployment[0].status,
         "created_by": "%s %s" % (deployment[1].firstname, deployment[1].lastname),
         "created_at": deployment[1].created_at,
+        "created_position": deployment[1].role,
         "git_commit": deployment[0].commit_id if deployment[0].commit_id else "N/A",
         "git_short_commit": deployment[0].commit_id[:6] if deployment[0].commit_id else "N/A",
-        "created_position": deployment[1].role,
     }
     return dict_data

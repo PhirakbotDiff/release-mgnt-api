@@ -29,6 +29,8 @@ class ImageResponse(BaseModel):
     short_name: Optional[str] = None
     namespace: str
     created_at: str | datetime | None
+    created_by: str | int | None
+    created_position: str | None = None
 
     class Config:
         orm_mode = True
@@ -46,6 +48,9 @@ class ImageResponse(BaseModel):
     def serialize_created_at(self, v: datetime) -> str:
         return v.strftime("%d %b, %Y")
 
+    @field_serializer("created_by")
+    def serialize_created_by(self, v: str) -> str:
+        return v if v else "N/A"
 
 class ImageScanCreate(BaseModel):
     image_id: int

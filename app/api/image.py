@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.auth.security import get_current_user, get_db
 from app.models.user import User
+from app.schemas.paginaiton import PaginatedResponse
 from app.schemas.image import ImageCreate, ImageResponse, ImageScanRequest, ImageScanDetailCreate
 from app.models.image import Image, ImageScan, ImageScanDetail, ScanStatus
 from app.utils.trivy import run_trivy
@@ -34,7 +35,8 @@ def list_images(
     namespace: str | None = Query(None),
     db: Session = Depends(get_db),
 ):
-    query = db.query(Image)
+    query = db.query(Image, User).\
+        join(User, Image.created_by == User.id)
 
     if environment_id:
         query = query.filter(Image.environment_id == environment_id)
@@ -46,7 +48,27 @@ def list_images(
         query = query.filter(Image.status == status)
 
     images = query.all()
-    return images
+
+    list_data = []
+    for image, user in images:
+        dict_data = {
+            "id": image.id,
+            "service_id": image.service_id,
+            "latest_version_scan": image.latest_version_scan,
+            "environment_id": image.environment_id,
+            "status": image.status,
+            "critical": image.critical,
+            "high": image.high,
+            "medium": image.medium,
+            "low": image.low,
+            "namespace": image.namespace,
+            "created_by": "%s %s" % (user.firstname, user.lastname) if user else "N/A",
+            "created_at": user.created_at if user else "N/A",
+            "created_position": user.role if user else "N/A",
+        }
+        list_data.append(dict_data)
+
+    return list_data
 
 @router.get("/{image_id}", 
     response_model=ImageResponse,
@@ -56,9 +78,28 @@ def get_images(
     image_id: int,
     db: Session = Depends(get_db),
 ):
-    query = db.query(Image).filter(Image.id == image_id)
-    images = query.first()
-    return images
+    images = (
+        db.query(Image, User).\
+            filter(Image.id == image_id).\
+            join(User, Image.created_by == User.id)
+    ).first()
+
+    dict_data = {
+        "id": images[0].id,
+        "service_id": images[0].service_id,
+        "latest_version_scan": images[0].latest_version_scan,
+        "environment_id": images[0].environment_id,
+        "status": images[0].status,
+        "critical": images[0].critical,
+        "high": images[0].high,
+        "medium": images[0].medium,
+        "low": images[0].low,
+        "namespace": images[0].namespace,
+        "created_by": "%s %s" % (images[1].firstname, images[1].lastname),
+        "created_at": images[1].created_at,
+        "created_position": images[1].role,
+    }
+    return dict_data
 
 
 @router.post("/scans/execute")
@@ -173,3 +214,13 @@ def create_scan_detail(
     db.add(detail)
     db.commit()
     return {"message": "Scan detail added"}
+
+
+@router.get("/scans/{scan_id}/details")
+def list_scan_details(
+    scan_id: int,
+    db: Session = Depends(get_db)
+):
+    query = db.query(ImageScanDetail).filter(ImageScanDetail.image_scan_id == scan_id)
+    details = query.all()
+    return details if details else []
