@@ -2,10 +2,16 @@ import json
 import subprocess
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
+from app.config import settings
 
 TRIVY_SERVER = "http://127.0.0.1:4954"
 
-def run_trivy(image: str, severities: list[str], insecure: bool):
+def run_trivy(
+    image: str, 
+    severities: list[str] = settings.SEVERITIES, 
+    insecure: bool = True
+) -> dict:
+    
     cmd = [
         "trivy",
         "image",

@@ -62,6 +62,8 @@ class ImageScanCreate(BaseModel):
     high: int = 0
     medium: int = 0
     low: int = 0
+    progress: int = 0
+    message: str = ""
 
 
 class ImageScanRequest(BaseModel):

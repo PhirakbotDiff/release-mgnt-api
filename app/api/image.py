@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, BackgroundTasks
+from sqlalchemy import case
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.auth.security import get_current_user, get_db
@@ -6,14 +7,13 @@ from app.models.user import User
 from app.schemas.paginaiton import PaginatedResponse
 from app.schemas.image import ImageCreate, ImageResponse, ImageScanRequest, ImageScanDetailCreate
 from app.models.image import Image, ImageScan, ImageScanDetail, ScanStatus
-from app.utils.trivy import run_trivy
+from app.logics.image import run_scan_task
+from app.database import SessionLocal
+
 
 router = APIRouter(prefix="/images", tags=["Images"])
 
-@router.post("/", 
-    response_model=ImageResponse, 
-    status_code=status.HTTP_201_CREATED
-)
+@router.post("/", response_model=ImageResponse, status_code=status.HTTP_201_CREATED)
 def create_image(
     payload: ImageCreate, 
     db: Session = Depends(get_db),
@@ -25,10 +25,8 @@ def create_image(
     db.refresh(image)
     return image
 
-@router.get("/", 
-    response_model=list[ImageResponse],
-    status_code=status.HTTP_200_OK
-)
+
+@router.get("/", response_model=list[ImageResponse], status_code=status.HTTP_200_OK)
 def list_images(
     environment_id: str | None = Query(None),
     status: ScanStatus | None = Query(None),
@@ -70,10 +68,8 @@ def list_images(
 
     return list_data
 
-@router.get("/{image_id}", 
-    response_model=ImageResponse,
-    status_code=status.HTTP_200_OK
-)
+
+@router.get("/{image_id}", response_model=ImageResponse, status_code=status.HTTP_200_OK)
 def get_images(
     image_id: int,
     db: Session = Depends(get_db),
@@ -105,92 +101,38 @@ def get_images(
 @router.post("/scans/execute")
 def execute_scan(
     payload: ImageScanRequest,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
     try:
-        # 1️⃣ Insert ImageScan (PENDING)
+
         scan = ImageScan(
             image_id=payload.image_id,
             image_current=payload.image_current,
             image_previous=payload.image_previous,
             environment_id=payload.environment_id,
-            status=ScanStatus.PENDING
+            status=ScanStatus.QUEUE,
+            progress=0,
+            message="Queued",
+            created_by=user.id
         )
+
         db.add(scan)
         db.commit()
         db.refresh(scan)
 
-        # 2️⃣ Execute scan
-        summary = run_trivy(payload.image_current, payload.severities, payload.insecure)
-
-        summary = {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0}
-        vulns = []
-
-        for result in summary.get("Results", []):
-
-            for v in result.get("Vulnerabilities", []):
-
-                sev = v["Severity"]
-                stus = v["Status"]
-                title = v["Title"]
-                summary[sev] = summary.get(sev, 0) + 1
-
-                detail = ImageScanDetail(
-                    image_scan_id=scan.id,
-                    cve_name=v["id"],
-                    severity=v["severity"],
-                    status=v["status"],
-                    package_name=v["package"],
-                    package_version=v["installed"],
-                    fixed_version=v["fixed"]
-                )
-                db.add(detail)
-                
-                vulns.append({
-                    "id": v["VulnerabilityID"],
-                    "severity": sev,
-                    "status": stus,
-                    "title": title,
-                    "package": v["PkgName"],
-                    "installed": v["InstalledVersion"],
-                    "fixed": v.get("FixedVersion"),
-                })
-
-        status = (
-            "FAIL" if summary.get("CRITICAL", 0) > 0
-            else "WARN" if summary.get("HIGH", 0) > 0
-            else "PASS"
+        background_tasks.add_task(
+            run_scan_task,
+            scan.id,
+            payload,
+            SessionLocal
         )
 
-        # 3️⃣ Update ImageScan with result
-        scan.status = ScanStatus.PENDING if status == "PASS" else ScanStatus.FAIL
-        scan.critical = summary.get("CRITICAL", 0)
-        scan.high = summary.get("HIGH", 0)
-        scan.medium = summary.get("MEDIUM", 0)
-        scan.low = summary.get("LOW", 0)
-
-        db.commit()
-        db.refresh(scan)
-
-        # 5️⃣ Final response
         return {
-            "image_scan": {
-                "id": scan.id,
-                "image_current": scan.image_current,
-                "status": scan.status,
-                "summary": summary
-            },
-            "vulnerabilities": [
-                {
-                    "cve": d.cve_name,
-                    "severity": d.severity,
-                    "package": d.package_name,
-                    "installed": d.package_version,
-                    "fixed": d.fixed_version
-                }
-                for d in vulns
-            ]
+            "scan_id": scan.id,
+            "status": scan.status,
+            "progress": scan.progress
         }
 
     except Exception as e:
@@ -201,7 +143,33 @@ def execute_scan(
         )
 
 
-@router.post("/image-scans/{scan_id}/details")
+@router.get("/scans/{scan_id}/progress")
+def get_scan_progress(
+    scan_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user)
+):
+
+    scan = db.query(ImageScan).filter(ImageScan.id == scan_id).first()
+
+    if not scan:
+        raise HTTPException(404, "Scan not found")
+
+    return {
+        "id": scan.id,
+        "progress": scan.progress,
+        "status": scan.status,
+        "message": scan.message,
+        "summary": {
+            "critical": scan.critical,
+            "high": scan.high,
+            "medium": scan.medium,
+            "low": scan.low,
+        }
+    }
+
+
+@router.post("/scans/{scan_id}/details")
 def create_scan_detail(
     scan_id: int,
     payload: ImageScanDetailCreate,
@@ -216,11 +184,49 @@ def create_scan_detail(
     return {"message": "Scan detail added"}
 
 
-@router.get("/scans/{scan_id}/details")
+@router.get("/scans/{scan_id}/vulnerabilities")
 def list_scan_details(
     scan_id: int,
+    page: int = 1,
+    size: int = 10,
+    search: str | None = None,
+    status: str | None = None,
     db: Session = Depends(get_db)
 ):
-    query = db.query(ImageScanDetail).filter(ImageScanDetail.image_scan_id == scan_id)
+    
+    severity_order = case(
+        (ImageScanDetail.severity == "CRITICAL", 1),
+        (ImageScanDetail.severity == "HIGH", 2),
+        (ImageScanDetail.severity == "MEDIUM", 3),
+        (ImageScanDetail.severity == "LOW", 4),
+        else_=5
+    )
+        
+    query = db.query(ImageScanDetail).\
+        filter(ImageScanDetail.image_scan_id == scan_id).\
+        order_by(severity_order)
+    
+    if search:
+        query = query.filter(
+            ImageScanDetail.severity.ilike(f"%{search}%")
+        )
+    
+    if status:
+        query = query.filter(
+            ImageScanDetail.status == status
+        )
+
+    total = query.count()
+
     details = query.all()
-    return details if details else []
+    details = details if details else {}
+
+    return {
+        "data": details,
+        "meta": {
+            "page": page,
+            "size": size,
+            "total": total,
+            "total_pages": (total + size - 1) // size,
+        },
+    }

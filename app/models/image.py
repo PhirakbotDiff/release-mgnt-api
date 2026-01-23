@@ -11,8 +11,10 @@ import enum
 class ScanStatus(str, enum.Enum):
     SUCCESS = "SUCCESS"
     WARNING = "WARNING"
-    FAIL = "FAIL"
+    FAILED = "FAILED"
     PENDING = "PENDING"
+    QUEUE = "QUEUE"
+    RUNNING = "RUNNING"
 
 class SeverityLevel(str, enum.Enum):
     CRITICAL = "CRITICAL"
@@ -57,6 +59,9 @@ class ImageScan(Base):
         Enum(ScanStatus, name="scan_status"),
         nullable=False
     )
+
+    progress = Column(Integer, default=0)
+    message = Column(String, default="")
     critical = Column(Integer, default=0)
     high = Column(Integer, default=0)
     medium = Column(Integer, default=0)
@@ -76,7 +81,10 @@ class ImageScanDetail(Base):
     id = Column(Integer, primary_key=True)
     image_scan_id = Column(Integer, ForeignKey("rl_image_scans.id"))
     cve_name = Column(String)
-    severity = Column(Enum(SeverityLevel))
+    severity = Column(
+        Enum(SeverityLevel, name="severity_level"),
+        nullable=False
+    )
     package_name = Column(String)
     status = Column(String)
     package_version = Column(String)
