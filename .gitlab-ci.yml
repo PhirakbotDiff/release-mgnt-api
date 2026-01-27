@@ -24,6 +24,7 @@ build:
     - echo "$REG_PWD" | docker login $REG_HOST -u "$REG_USERNAME" --password-stdin
   script:
     - echo "Building Docker images..."
+    - echo "Host name $REG_HOST"
     - docker build -t $IMAGE_NAME:$IMAGE_TAG .
     - docker build -t $IMAGE_NAME:latest .
     - echo "Pushing images to registry..."
