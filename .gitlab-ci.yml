@@ -11,8 +11,10 @@ variables:
 # Build Docker image
 build:
   stage: build
-  image: docker:24
-  services: []
+  image: docker:latest
+  services:
+    - name: docker:dind
+      command: ["--tls=false", "--insecure-registry=10.20.10.117:5000"]
   variables:
     DOCKER_HOST: tcp://docker:2375
     DOCKER_TLS_CERTDIR: ""
