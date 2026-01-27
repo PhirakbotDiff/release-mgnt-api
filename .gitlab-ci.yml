@@ -15,11 +15,13 @@ build:
     - name: docker:dind
       command: ["--tls=false", "--insecure-registry=$REG_HOST"]
   variables:
-    DOCKER_HOST: tcp://docker:2375
+    # DOCKER_HOST: tcp://docker:2375
+    DOCKER_HOST: unix:///var/run/docker.sock
     DOCKER_TLS_CERTDIR: ""
     DOCKER_TLS_VERIFY: ""
     IMAGE_NAME: "$REG_HOST/$BE_IMAGE_NAME"
   before_script:
+    - docker info
     - echo "Logging into private registry..."
     - echo "Host Name $REG_HOST $REG_USERNAME"
     - echo "$REG_PWD" | docker login $REG_HOST -u "$REG_USERNAME" --password-stdin
