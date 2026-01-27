@@ -11,12 +11,14 @@ variables:
 build:
   stage: build
   image: docker:24
+  services: []
   variables:
     DOCKER_HOST: unix:///var/run/docker.sock
     DOCKER_TLS_CERTDIR: ""
     DOCKER_TLS_VERIFY: ""
     IMAGE_NAME: "$REG_HOST/$BE_IMAGE_NAME"
   before_script:
+    - docker version
     - docker info
     - echo "Logging into private registry..."
     - echo "Host Name $REG_HOST $REG_USERNAME"
