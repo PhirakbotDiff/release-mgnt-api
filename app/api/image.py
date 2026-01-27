@@ -63,6 +63,7 @@ def list_images(
             "created_by": "%s %s" % (user.firstname, user.lastname) if user else "N/A",
             "created_at": user.created_at if user else "N/A",
             "created_position": user.role if user else "N/A",
+            "updated_at": user.updated_at if user else None
         }
         list_data.append(dict_data)
 
@@ -92,8 +93,9 @@ def get_images(
         "low": images[0].low,
         "namespace": images[0].namespace,
         "created_by": "%s %s" % (images[1].firstname, images[1].lastname),
-        "created_at": images[1].created_at,
+        "created_at": images[0].created_at,
         "created_position": images[1].role,
+        "updated_at": images[0].updated_at
     }
     return dict_data
 

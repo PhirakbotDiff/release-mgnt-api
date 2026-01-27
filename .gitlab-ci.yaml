@@ -1,0 +1,37 @@
+stages:
+  - build
+
+variables:
+  IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+  REG_PWD: $REGISTRY_PWD
+  REG_HOST: $REGISTRY_HOST
+  REG_USERNAME: $REGISTRY_USERNAME
+
+# Build Docker image
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - name: docker:dind
+      command: ["--tls=false", "--insecure-registry=$REG_HOST"]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_TLS_VERIFY: ""
+    IMAGE_NAME: "$REG_HOST/$BE_IMAGE_NAME"
+  before_script:
+    - echo "Logging into private registry..."
+    - echo "$REG_PWD" | docker login $REG_HOST -u "$REG_USERNAME" --password-stdin
+  script:
+    - echo "Building Docker images..."
+    - docker build -t $IMAGE_NAME:$IMAGE_TAG .
+    - docker build -t $IMAGE_NAME:latest .
+    - echo "Pushing images to registry..."
+    - docker push $IMAGE_NAME:$IMAGE_TAG
+    - docker push $IMAGE_NAME:latest
+    - echo "Build and push completed successfully"
+    - echo "IMAGE_URL=$IMAGE_NAME:$IMAGE_TAG"
+  only:
+    - main
+    - uat
+
