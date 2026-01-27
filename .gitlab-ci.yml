@@ -21,10 +21,10 @@ build:
     IMAGE_NAME: "$REG_HOST/$BE_IMAGE_NAME"
   before_script:
     - echo "Logging into private registry..."
+    - echo "Host Name $REG_HOST $REG_USERNAME"
     - echo "$REG_PWD" | docker login $REG_HOST -u "$REG_USERNAME" --password-stdin
   script:
     - echo "Building Docker images..."
-    - echo "Host Name $REG_HOST"
     - docker build -t $IMAGE_NAME:$IMAGE_TAG .
     - docker build -t $IMAGE_NAME:latest .
     - echo "Pushing images to registry..."
