@@ -10,6 +10,7 @@ WORKDIR /app
 # System dependencies (optional but useful)
 RUN apt-get update && apt-get install -y \
     build-essential \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
