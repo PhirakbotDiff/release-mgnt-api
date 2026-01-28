@@ -2,6 +2,7 @@ FROM python:3.11-slim
 
 # Prevent Python from writing .pyc files
 ENV PYTHONDONTWRITEBYTECODE=1
+
 # Ensure logs are flushed immediately
 ENV PYTHONUNBUFFERED=1
 
