@@ -1,6 +1,7 @@
 fastapi
 pydantic-settings
 uvicorn
+gunicorn
 pyyaml
 gitpython
 python-dotenv
