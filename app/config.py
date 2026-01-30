@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     IMAGE_REGISTRY_USERNAME: str
     IMAGE_REGISTRY_PASSWORD: str
     SEVERITIES: list[str] = ["CRITICAL", "HIGH", "MEDIUM"]
+    
+    DB_HOST: str = "localhost"
 
     class Config:
         env_file = ".env"
