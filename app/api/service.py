@@ -8,7 +8,7 @@ from app.models.service import Service as ServiceModel
 
 router = APIRouter(prefix="/services", tags=["Services"])
 
-@router.post("/", response_model=Service, summary="Create a new service",)
+@router.post("/create", response_model=Service, summary="Create a new service",)
 def create_service(
     service: ServiceCreate, 
     db: Session = Depends(get_db),
@@ -36,7 +36,7 @@ def create_service(
             detail="An unexpected error occurred while creating the service."
         )
 
-@router.get("/", response_model=list[Service], summary="List all services")
+@router.get("/list", response_model=list[Service], summary="List all services")
 def read_services(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -44,7 +44,7 @@ def read_services(
     return db.query(ServiceModel).all()
 
 
-@router.put("/{service_id}", response_model=Service)
+@router.put("/get/{service_id}", response_model=Service)
 def update_service(
     service_id: int,
     service_in: ServiceUpdate,

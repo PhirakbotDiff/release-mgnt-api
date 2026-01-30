@@ -13,7 +13,7 @@ from app.database import SessionLocal
 
 router = APIRouter(prefix="/images", tags=["Images"])
 
-@router.post("/", response_model=ImageResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/create", response_model=ImageResponse, status_code=status.HTTP_201_CREATED)
 def create_image(
     payload: ImageCreate, 
     db: Session = Depends(get_db),
@@ -26,7 +26,7 @@ def create_image(
     return image
 
 
-@router.get("/", response_model=list[ImageResponse], status_code=status.HTTP_200_OK)
+@router.get("/list", response_model=list[ImageResponse], status_code=status.HTTP_200_OK)
 def list_images(
     environment_id: str | None = Query(None),
     status: ScanStatus | None = Query(None),
@@ -70,7 +70,7 @@ def list_images(
     return list_data
 
 
-@router.get("/{image_id}", response_model=ImageResponse, status_code=status.HTTP_200_OK)
+@router.get("/get/{image_id}", response_model=ImageResponse, status_code=status.HTTP_200_OK)
 def get_images(
     image_id: int,
     db: Session = Depends(get_db),

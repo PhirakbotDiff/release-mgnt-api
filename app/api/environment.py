@@ -11,7 +11,7 @@ from app.models.user import User
 router = APIRouter(prefix="/environments", tags=["Environments"])
 
 @router.post(
-    "/", 
+    "/create", 
     response_model=Environment, 
     status_code=status.HTTP_201_CREATED,
     summary="Create a new environment"
@@ -39,7 +39,7 @@ def create_environment(
             detail=f"Environment with name '{env_in.name}' already exists."
         )
 
-@router.get("/", response_model=List[Environment])
+@router.get("/list", response_model=List[Environment])
 def list_environments(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -48,7 +48,7 @@ def list_environments(
     return db.query(EnvironmentModel).all()
 
 
-@router.get("/{env_id}", response_model=Environment)
+@router.get("/get/{env_id}", response_model=Environment)
 def get_environment(
     env_id: int, 
     db: Session = Depends(get_db),
