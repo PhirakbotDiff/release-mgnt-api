@@ -12,7 +12,7 @@ from app.utils.tools import calc_percentage
 router = APIRouter(prefix="/dashboard", tags=["Dashboard Stats"])
 
 
-@router.get("/", response_model=DashboardStats, summary="List Dashboard")
+@router.get("/list", response_model=DashboardStats, summary="List Dashboard")
 def get_dashboard(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
