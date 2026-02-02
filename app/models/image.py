@@ -15,6 +15,7 @@ class ScanStatus(str, enum.Enum):
     PENDING = "PENDING"
     QUEUE = "QUEUE"
     RUNNING = "RUNNING"
+    INIT = "INIT"
 
 class SeverityLevel(str, enum.Enum):
     CRITICAL = "CRITICAL"

@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from app.schemas.paginaiton import PaginatedResponse
 from app.auth.security import get_current_user, get_db
 from app.models.user import User
 from app.schemas.service import Service, ServiceCreate, ServiceUpdate
 from app.models.service import Service as ServiceModel
+from app.models.image import Image as ImageModel
 
 router = APIRouter(prefix="/services", tags=["Services"])
 
@@ -14,10 +16,41 @@ def create_service(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    # The 'service' variable is already validated by Pydantic here
-    db_service = ServiceModel(**service.model_dump())
+    
+    # 1️⃣ Check existing service by slug
+    existing_service = (
+        db.query(ServiceModel)
+        .filter(ServiceModel.slug == service.slug)
+        .first()
+    )
+
+    if existing_service:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Service with this slug already exists",
+        )
+    
     try:
+        # The 'service' variable is already validated by Pydantic here
+        db_service = ServiceModel(
+            **service.model_dump(),
+            created_by=current_user.id
+        )
         db.add(db_service)
+
+        db_image = ImageModel(
+            service_id=service.slug,
+            latest_version_scan="latest",
+            environment_id="UAT",
+            status="INIT",
+            critical=0,
+            high=0,
+            medium=0,
+            low=0,
+            namespace=service.namespace,
+        )
+        db.add(db_image)
+
         db.commit()
         db.refresh(db_service)
         return db_service
@@ -29,6 +62,7 @@ def create_service(
             detail=f"Service with slug '{service.slug}' already exists."
         )
     except Exception as e:
+        print("e",e)
         db.rollback()
         # Log the error here for internal debugging
         raise HTTPException(
@@ -36,12 +70,70 @@ def create_service(
             detail="An unexpected error occurred while creating the service."
         )
 
-@router.get("/list", response_model=list[Service], summary="List all services")
+@router.get("/list", response_model=PaginatedResponse[Service], summary="List all services")
 def read_services(
+    page: int = 1,
+    size: int = 10,
+    search: str | None = None,
+    namespace: str | None = None,
+    slug: str | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    return db.query(ServiceModel).all()
+    
+    list_data = []
+
+    # list_data = db.query(ServiceModel).all()
+
+    q = db.query(ServiceModel, User).\
+        join(User, ServiceModel.created_by == User.id)
+
+    if search:
+        q = q.filter(
+            ServiceModel.namespace.ilike(f"%{search}%") |
+            ServiceModel.description.ilike(f"%{search}%")
+        )
+
+    if namespace:
+        q = q.filter(ServiceModel.namespace == namespace)
+
+    if slug:
+        q = q.filter(ServiceModel.slug == slug)
+
+    total = q.count()
+
+    data = (
+        q.order_by(ServiceModel.created_at.desc())
+         .offset((page - 1) * size)
+         .limit(size)
+         .all()
+    )
+
+    for deployment, user in data:
+        dict_data = {
+            "id": deployment.id,
+            "name": deployment.name,
+            "namespace": deployment.namespace,
+            "slug": deployment.slug, 
+            "manifest_path": deployment.manifest_path,
+            "description": deployment.description,
+            "created_by": "%s %s" % (user.firstname, user.lastname),
+            "created_at": user.created_at,
+            "created_position": user.role,
+            "updated_at": user.updated_at
+
+        }
+        list_data.append(dict_data)
+
+    return {
+        "data": list_data,
+        "meta": {
+            "page": page,
+            "size": size,
+            "total": total,
+            "total_pages": (total + size - 1) // size,
+        },
+    }
 
 
 @router.put("/get/{service_id}", response_model=Service)

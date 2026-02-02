@@ -13,6 +13,7 @@ from app.utils.bgtask import run_deploy_job
 
 router = APIRouter(prefix="/deploy", tags=["Deploy"])
 
+
 @router.post("/create", response_model=DeployResponse)
 async def deploy(
     req: DeployRequest,
@@ -63,6 +64,7 @@ async def deploy(
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
 
 @router.get("/list", 
     response_model=PaginatedResponse[ListDeploy], 

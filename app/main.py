@@ -7,6 +7,7 @@ from app.api.service import router as service_router
 from app.api.environment import router as environment_router
 from app.api.dashboard import router as dashboard_router
 from app.api.image import router as image_router
+from app.api.namespace import router as ns_router
 
 app = FastAPI(
     title="Release Service",
@@ -36,3 +37,4 @@ app.include_router(service_router)
 app.include_router(environment_router)
 app.include_router(dashboard_router)
 app.include_router(image_router)
+app.include_router(ns_router)
