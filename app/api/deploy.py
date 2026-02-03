@@ -87,14 +87,15 @@ async def get_deploy(
     if search:
         q = q.filter(
             DeploymentModel.service.ilike(f"%{search}%") |
-            DeploymentModel.env.ilike(f"%{search}%")
+            DeploymentModel.environment.ilike(f"%{search}%") |
+            DeploymentModel.image_tag.ilike(f"%{search}%")
         )
 
     if status:
         q = q.filter(DeploymentModel.status == status)
 
     if env:
-        q = q.filter(DeploymentModel.env == env)
+        q = q.filter(DeploymentModel.environment == env)
 
     total = q.count()
 

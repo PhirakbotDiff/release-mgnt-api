@@ -70,6 +70,7 @@ def create_service(
             detail="An unexpected error occurred while creating the service."
         )
 
+
 @router.get("/list", response_model=PaginatedResponse[Service], summary="List all services")
 def read_services(
     page: int = 1,
@@ -134,6 +135,60 @@ def read_services(
             "total_pages": (total + size - 1) // size,
         },
     }
+
+
+@router.get(
+    "/get/{service_id}",
+    response_model=Service,
+    summary="Get service by ID"
+)
+def get_service_by_id(
+    service_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user)
+):
+    
+    service_obj = (
+        db.query(
+            ServiceModel, 
+            User,
+            ImageModel
+        )
+        .join(User, ServiceModel.created_by == User.id)
+        .join(ImageModel, ServiceModel.slug == ImageModel.service_id)
+        .filter(ServiceModel.id == int(service_id))
+        .first()
+    )
+
+    if not service_obj:
+        raise HTTPException(
+            status_code=404,
+            detail="Service not found"
+        )
+    
+    dict_data = {
+        "id": service_obj[0].id,
+        "name": service_obj[0].name,
+        "namespace": service_obj[0].namespace,
+        "slug": service_obj[0].slug, 
+        "manifest_path": service_obj[0].manifest_path,
+        "description": service_obj[0].description,
+        "created_by": "%s %s" % (service_obj[1].firstname, service_obj[1].lastname),
+        "created_at": service_obj[1].created_at,
+        "created_position": service_obj[1].role,
+        "updated_at": service_obj[1].updated_at,
+        "image": {
+            "latest_version": service_obj[2].latest_version_scan or "latest",
+            "status": service_obj[2].status or "INIT",
+            "critical": service_obj[2].critical or 0,
+            "high": service_obj[2].high or 0,
+            "medium": service_obj[2].medium or 0,
+            "low": service_obj[2].low or 0,
+        }
+
+    }
+    
+    return dict_data or {}
 
 
 @router.put("/get/{service_id}", response_model=Service)
