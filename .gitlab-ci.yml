@@ -52,6 +52,11 @@ deploy:
     - ssh-keygen -l -f ~/.ssh/id_ed25519 || echo "INVALID SSH KEY"
     - ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
 
+    # Clone the repo containing deploy_uat.yml
+    - apk add --no-cache git  # Install git if not available
+    - git clone "https://${GITLAB_USER}:${GITLAB_PASSWORD}@gitscm.vattanacbrewery.com/devops/ansible.git" ansible
+    - cd ansible
+
     - python3 -m venv venv
     - . venv/bin/activate
     - pip install --upgrade pip
@@ -59,9 +64,6 @@ deploy:
     - ansible-galaxy collection install community.docker
     - apk add --no-cache curl
   script:
-    - echo "$PWD"
-    - cd /home/vbl-devop/release-ci-cd
-    - echo "$PWD"
     - ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ansible/inventory.ini ansible/deploy.yml -e "CI_REGISTRY=$REG_HOST" -e "CI_REGISTRY_USER=$REG_USERNAME" -e "CI_REGISTRY_PASSWORD=$REG_PWD" -e "IMAGE_TAG=$IMAGE_TAG" --ask-pass --ask-become-pass
     # - |
     #   echo "$DEPLOY_USER $DEPLOY_HOST"
