@@ -47,9 +47,9 @@ deploy:
   before_script:
     - apk add --no-cache openssh python3 py3-pip
     - mkdir -p ~/.ssh
-    - echo "$DEPLOY_SSH_KEY" | sed 's/\r$//' > ~/.ssh/id_ed25519.pub
-    - chmod 600 ~/.ssh/id_ed25519.pub
-    - ssh-keygen -l -f ~/.ssh/id_ed25519.pub || echo "INVALID SSH KEY"
+    - echo "$DEPLOY_SSH_KEY" | sed 's/\r$//' > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    - ssh-keygen -l -f ~/.ssh/id_ed25519 || echo "INVALID SSH KEY"
     - ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
 
     - echo "$GITLAB_SSH_KEY" | tr -d '\r' > $HOME/.ssh/id_rsa
