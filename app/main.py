@@ -1,5 +1,8 @@
 from fastapi import FastAPI # type: ignore
 from fastapi.middleware.cors import CORSMiddleware # type: ignore
+from contextlib import asynccontextmanager
+
+from app.auth.security import init_default_user
 from app.api.deploy import router as deploy_router
 from app.api.auth import router as auth_router
 from app.api.users import router as user_router
@@ -8,6 +11,13 @@ from app.api.environment import router as environment_router
 from app.api.dashboard import router as dashboard_router
 from app.api.image import router as image_router
 from app.api.namespace import router as ns_router
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_default_user()
+    yield
+
 
 app = FastAPI(
     title="Release Service",
@@ -18,7 +28,8 @@ app = FastAPI(
         "docExpansion": "none",          # Collapse all sections by default
         "defaultModelsExpandDepth": -1,  # Hide models section
         "syntaxHighlight": False,        # Disable syntax highlighting
-    }
+    },
+    lifespan=lifespan
 )
 
 # Add this block
