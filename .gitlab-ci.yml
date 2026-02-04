@@ -48,18 +48,14 @@ deploy:
   image: alpine:latest
   before_script:
     - apk add --no-cache openssh
-
-    - mkdir -p "$HOME/.ssh"
-    - cd "$HOME/.ssh"
-    - chmod 700 .
-    
-    - echo "$DEPLOY_SSH_KEY"
+    - mkdir -p ~/.ssh
     - echo "$DEPLOY_SSH_KEY" | sed 's/\r$//' > ~/.ssh/id_ed25519
     - chmod 600 ~/.ssh/id_ed25519
+    - ssh-keygen -l -f ~/.ssh/id_ed25519 || echo "INVALID SSH KEY"
     - ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
   script:
     - |
-      ssh $DEPLOY_USER@$DEPLOY_HOST <<EOF
+      ssh -o StrictHostKeyChecking=yes $DEPLOY_USER@$DEPLOY_HOST <<EOF
         docker login -u "$REG_USERNAME" -p "$REG_PWD" "$REG_HOST"
         cd /home/vbl-devop/release-ci-cd
         echo "$IMAGE_TAG"
