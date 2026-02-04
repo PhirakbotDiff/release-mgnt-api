@@ -3,6 +3,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from app.database import SessionLocal
 from app.models.user import User
 from app.auth.auth import get_password_hash
@@ -51,10 +52,10 @@ def get_current_user(
     return user
 
 
-def init_default_user(
-    db: Session = Depends(get_db),
-):
+def init_default_user():
     
+    db = SessionLocal()
+
     try:
         user_exists = db.query(User).first()
         if user_exists:
@@ -74,5 +75,8 @@ def init_default_user(
         db.add(admin_user)
         db.commit()
         print("✅ Default admin user created")
+    
+    except IntegrityError:
+        db.rollback()
     finally:
         db.close()
