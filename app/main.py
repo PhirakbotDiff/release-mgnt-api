@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from contextlib import asynccontextmanager
 
 from app.auth.security import init_default_user
+from app.auth.init_db import create_tables
 from app.api.deploy import router as deploy_router
 from app.api.auth import router as auth_router
 from app.api.users import router as user_router
@@ -15,6 +16,7 @@ from app.api.namespace import router as ns_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    create_tables()
     init_default_user()
     yield
 
