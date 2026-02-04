@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     SEVERITIES: list[str] = ["CRITICAL", "HIGH", "MEDIUM"]
     
     DB_HOST: str = "localhost"
+    DB_USER: str = "postgres"
+    DB_PWD: str = "postgres"
 
     class Config:
         env_file = ".env"
