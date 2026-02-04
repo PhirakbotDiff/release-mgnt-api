@@ -30,6 +30,7 @@ build:
     - docker version
     - docker info
     - echo "Logging into private registry..."
+    - echo "Host Name $REG_HOST $REG_USERNAME"
     - echo "$REG_PWD" | docker login $REG_HOST -u "$REG_USERNAME" --password-stdin
   script:
     - echo "Building Docker images..."
