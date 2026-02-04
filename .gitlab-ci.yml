@@ -59,6 +59,9 @@ deploy:
     - ansible-galaxy collection install community.docker
     - apk add --no-cache curl
   script:
+    - echo "$PWD"
+    - cd /home/vbl-devop/release-ci-cd
+    - echo "$PWD"
     - ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ansible/inventory.ini ansible/deploy.yml -e "CI_REGISTRY=$REG_HOST" -e "CI_REGISTRY_USER=$REG_USERNAME" -e "CI_REGISTRY_PASSWORD=$REG_PWD" -e "IMAGE_TAG=$IMAGE_TAG" --ask-pass --ask-become-pass
     # - |
     #   echo "$DEPLOY_USER $DEPLOY_HOST"
