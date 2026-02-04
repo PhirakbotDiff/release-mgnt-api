@@ -1,11 +1,13 @@
 from passlib.context import CryptContext
 from jose import jwt
 from datetime import datetime, timedelta
-from app.auth.security import SECRET_KEY, ALGORITHM
 import bcrypt
 
 from app.config import settings
 
+
+SECRET_KEY = "CHANGE_THIS_SECRET"
+ALGORITHM = "HS256"
 
 # Replace your pwd_context
 def get_password_hash(password: str) -> str:
