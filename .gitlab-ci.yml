@@ -48,7 +48,11 @@ deploy:
   image: alpine:latest
   before_script:
     - apk add --no-cache openssh
-    - mkdir -p ~/.ssh
+    
+    - mkdir -p "$HOME/.ssh"
+    - cd "$HOME/.ssh"
+    - chmod 700 .
+    
     - echo "$DEPLOY_SSH_KEY"
     - echo "$DEPLOY_SSH_KEY" | tr -d '\r' > ~/.ssh/id_ed25519
     - chmod 600 ~/.ssh/id_ed25519
