@@ -54,8 +54,8 @@ deploy:
 
     # Clone the repo containing deploy_uat.yml
     - apk add --no-cache git  # Install git if not available
-    - git clone "https://${GITLAB_USER}:${GITLAB_PASSWORD}@gitscm.vattanacbrewery.com/devops/ansible.git" ansible
-    - cd ansible
+    - git clone "https://${GITLAB_USER}:${GITLAB_PASSWORD}@gitscm.vattanacbrewery.com/devops/release-ci-cd.git" releasedeploy
+    - cd releasedeploy
 
     - python3 -m venv venv
     - . venv/bin/activate
