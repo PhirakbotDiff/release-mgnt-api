@@ -14,8 +14,10 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
 COPY requirements.txt .
+COPY scripts .
+    
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application

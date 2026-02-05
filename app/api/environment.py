@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import List
+from datetime import datetime
 
 from app.models.environment import Environment as EnvironmentModel
 from app.schemas.environment import Environment, EnvironmentCreate, EnvironmentUpdate
@@ -25,7 +26,13 @@ def create_environment(
     Create a deployment environment (e.g., Production, Staging).
     Requires an authenticated user.
     """
-    db_env = EnvironmentModel(**env_in.model_dump())
+    now = datetime.utcnow()
+
+    db_env = EnvironmentModel(
+        **env_in.model_dump(),
+        created_at = now,
+        created_by=current_user.id
+    )
     
     try:
         db.add(db_env)
@@ -55,10 +62,31 @@ def get_environment(
     current_user: User = Depends(get_current_user)
 ):
     """Fetch a specific environment by its ID."""
-    db_env = db.query(EnvironmentModel).filter(EnvironmentModel.id == env_id).first()
-    if not db_env:
-        raise HTTPException(status_code=404, detail="Environment not found")
-    return db_env
+    env_obj = db.query(
+            EnvironmentModel,
+            User,
+        ).\
+        join(User, EnvironmentModel.created_by == User.id).\
+        filter(EnvironmentModel.id == env_id).\
+        first()
+    
+    if not env_obj:
+        raise HTTPException(
+            status_code=404, 
+            detail="Environment not found"
+        )
+    
+    dict_data = {
+        "id": env_obj[0].id,
+        "name": env_obj[0].name,
+        "description": env_obj[0].description,
+        "created_by": "%s %s" % (env_obj[1].firstname, env_obj[1].lastname),
+        "created_at": env_obj[1].created_at,
+        "created_position": env_obj[1].role,
+        "updated_at": env_obj[1].updated_at
+    }
+
+    return dict_data
 
 
 @router.delete("/{env_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -77,7 +105,7 @@ def delete_environment(
     return None
 
 
-@router.put("/{env_id}", response_model=Environment)
+@router.put("/update/{env_id}", response_model=Environment)
 def update_environment(
     env_id: int,
     env_in: EnvironmentUpdate,

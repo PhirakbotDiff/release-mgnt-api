@@ -7,9 +7,7 @@ db = SessionLocal()
 environments_to_add = [
     {"name": "PROD", "description": "Live user-facing environment."},
     {"name": "UAT", "description": "User Acceptance Testing environment."},
-    {"name": "DEV", "description": "Internal sandbox for feature development."},
-    # {"name": "Staging", "description": "Pre-production environment for final testing."},
-    # {"name": "Lab", "description": "Experimental environment for R&D."}
+    # {"name": "DEV", "description": "Internal sandbox for feature development."},
 ]
 try:
     # Convert dictionaries to model objects

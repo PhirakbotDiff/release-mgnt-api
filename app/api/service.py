@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+
+from datetime import datetime
 from app.schemas.paginaiton import PaginatedResponse
 from app.auth.security import get_current_user, get_db
 from app.models.user import User
@@ -31,10 +33,12 @@ def create_service(
         )
     
     try:
+        now = datetime.utcnow()
         # The 'service' variable is already validated by Pydantic here
         db_service = ServiceModel(
             **service.model_dump(),
-            created_by=current_user.id
+            created_by=current_user.id,
+            created_at = now
         )
         db.add(db_service)
 
@@ -110,14 +114,14 @@ def read_services(
          .all()
     )
 
-    for deployment, user in data:
+    for serv, user in data:
         dict_data = {
-            "id": deployment.id,
-            "name": deployment.name,
-            "namespace": deployment.namespace,
-            "slug": deployment.slug, 
-            "manifest_path": deployment.manifest_path,
-            "description": deployment.description,
+            "id": serv.id,
+            "name": serv.name,
+            "namespace": serv.namespace,
+            "slug": serv.slug, 
+            "manifest_path": serv.manifest_path,
+            "description": serv.description,
             "created_by": "%s %s" % (user.firstname, user.lastname),
             "created_at": user.created_at,
             "created_position": user.role,

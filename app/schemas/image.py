@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator, field_serializer
+from pydantic import BaseModel, validator, field_serializer, ConfigDict
 from typing import Optional, List
 from datetime import datetime
 from app.models.image import ScanStatus, SeverityLevel
@@ -33,8 +33,7 @@ class ImageResponse(BaseModel):
     created_position: str | None = None
     updated_at: str | datetime | None = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
     @validator("short_name", pre=True, always=True)
     def set_short_name(cls, v, values):

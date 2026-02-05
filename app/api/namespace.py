@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import List
+from datetime import datetime
 
 from app.models.namespace import Namespace as NamespaceModel
 from app.schemas.namespace import Namespace, NamespaceLOV, NamespaceCreate, NamespaceUpdate
@@ -25,7 +26,13 @@ def create_namespace(
     Create a deployment namespace (e.g., sfa, default).
     Requires an authenticated user.
     """
-    db_env = NamespaceModel(**ns_in.model_dump())
+    now = datetime.utcnow()
+    
+    db_env = NamespaceModel(
+        created_at = now,
+        created_by=current_user.id,
+        **ns_in.model_dump()
+    )
     
     try:
         db.add(db_env)

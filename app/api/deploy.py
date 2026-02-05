@@ -1,8 +1,10 @@
 from fastapi import Depends, APIRouter, HTTPException, BackgroundTasks # type: ignore
+from sqlalchemy.orm import Session, joinedload # type: ignore
+
+from datetime import datetime
 from app.schemas.deploy import DeployRequest, Deploy, ListDeploy, DeployResponse
 from app.schemas.paginaiton import PaginatedResponse
 from app.auth.security import get_current_user, get_db
-from sqlalchemy.orm import Session, joinedload # type: ignore
 from app.models.deploy import Deployment as DeploymentModel
 from app.models.service import Service as ServiceModel
 from app.models.user import User
@@ -23,6 +25,8 @@ async def deploy(
 ):
     try:
 
+        now = datetime.utcnow()
+
         # 1️⃣ Insert deployment record
         deployment = DeploymentModel(
             service=req.service,
@@ -31,7 +35,8 @@ async def deploy(
             git_tag=req.git_tag,
             status="PENDING",
             created_by=user.id,
-            description=req.description
+            description=req.description,
+            created_at=now
         )
 
         db.add(deployment)
@@ -43,7 +48,6 @@ async def deploy(
             .filter(ServiceModel.slug == str(req.service)) \
             .first()
 
-        print("service_obj", service_obj)
         # 2️⃣ Run deployment in background
         background_tasks.add_task(
             run_deploy_job,
