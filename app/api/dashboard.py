@@ -106,7 +106,10 @@ def get_dashboard(
 
 
 @router.get("/top-deployments")
-def top_deployments(db: Session = Depends(get_db)):
+def top_deployments(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
     last_30_days = datetime.utcnow() - timedelta(days=30)
 
     # Count deployments per service (last 30 days)

@@ -1,10 +1,14 @@
 
 
 from fastapi import HTTPException
-from datetime import datetime
 from app.models.image import Image, ImageScan, ImageScanDetail, ScanStatus
 from app.utils.trivy import run_trivy
 from app.config import settings
+
+from datetime import datetime
+import logging
+
+logger = logging.getLogger("api")
 
 
 def run_scan_task(
@@ -16,6 +20,8 @@ def run_scan_task(
     db = db_session_factory()
 
     try:
+
+        now = datetime.utcnow()
 
         scan = db.query(ImageScan).filter(ImageScan.id == scan_id).first()
 
@@ -79,29 +85,37 @@ def run_scan_task(
         scan.medium = summary["MEDIUM"]
         scan.low = summary["LOW"]
         scan.message = "Scan completed"
+        scan.updated_at = now
 
         # update current image_current to table Image
         db.query(Image)\
             .filter(Image.id == payload.image_id)\
             .update({
                 Image.latest_version_scan: payload.image_current,
-                Image.status: status
+                Image.status: status,
+                Image.updated_at: now,
             })
 
         db.commit()
 
+        logger.info(f"run background scan task successfully.")
+
     except Exception as e:
+        logger.exception(f"run background scan task failed {str(e)}")
+
         # update current image_current to table Image
         db.query(Image)\
             .filter(Image.id == payload.image_id)\
             .update({
                 Image.latest_version_scan: payload.image_current,
-                Image.status: ScanStatus.FAILED
+                Image.status: ScanStatus.FAILED,
+                Image.updated_at: now,
             })
         
         scan.status = ScanStatus.FAILED
         scan.progress = 100
         scan.message = str(e)
+        scan.updated_at = now
         db.commit()
 
     finally:

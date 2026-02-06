@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     DB_USER: str = "postgres"
     DB_PWD: str = "postgres"
 
+    TRIVY_SERVER: str = "http://127.0.0.1:4954"
+
     class Config:
         env_file = ".env"
 

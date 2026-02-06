@@ -3,8 +3,11 @@ import subprocess
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from app.config import settings
+import logging
 
-TRIVY_SERVER = "http://127.0.0.1:4954"
+
+logger = logging.getLogger("api")
+
 
 def run_trivy(
     image: str, 
@@ -15,7 +18,7 @@ def run_trivy(
     cmd = [
         "trivy",
         "image",
-        "--server", TRIVY_SERVER,
+        "--server", settings.TRIVY_SERVER,
         "--format", "json",
         "--severity", ",".join(severities),
     ]
@@ -33,12 +36,17 @@ def run_trivy(
             timeout=600
         )
     except subprocess.TimeoutExpired:
-        raise HTTPException(status_code=504, detail="Trivy scan timed out")
+        logger.exception("Trivy scan timed out")
+        raise HTTPException(
+            status_code=504, 
+            detail="Trivy scan timed out"
+        )
 
     # Trivy exit codes:
     # 0 = no vulns
     # 5 = vulns found
     if result.returncode not in (0, 5):
+        logger.exception(result.stderr.strip() or "Trivy execution failed")
         raise HTTPException(
             status_code=500,
             detail=result.stderr.strip() or "Trivy execution failed"

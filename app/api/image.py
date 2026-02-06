@@ -10,6 +10,10 @@ from app.models.image import Image, ImageScan, ImageScanDetail, ScanStatus
 from app.logics.image import run_scan_task
 from app.database import SessionLocal
 
+from datetime import datetime
+import logging
+
+logger = logging.getLogger("api")
 
 router = APIRouter(prefix="/images", tags=["Images"])
 
@@ -32,6 +36,7 @@ def list_images(
     status: ScanStatus | None = Query(None),
     namespace: str | None = Query(None),
     db: Session = Depends(get_db),
+    user: User = Depends(get_current_user)
 ):
     query = db.query(Image, User).\
         join(User, Image.created_by == User.id)
@@ -109,6 +114,8 @@ def execute_scan(
 ):
     try:
 
+        now = datetime.utcnow()
+
         scan = ImageScan(
             image_id=payload.image_id,
             image_current=payload.image_current,
@@ -117,7 +124,8 @@ def execute_scan(
             status=ScanStatus.QUEUE,
             progress=0,
             message="Queued",
-            created_by=user.id
+            created_by=user.id,
+            created_at=now
         )
 
         db.add(scan)
@@ -131,6 +139,7 @@ def execute_scan(
             SessionLocal
         )
 
+        logger.info(f"Image starting scan #{str(scan.id)} successfully.")
         return {
             "scan_id": scan.id,
             "status": scan.status,
@@ -139,9 +148,10 @@ def execute_scan(
 
     except Exception as e:
         db.rollback()
+        logger.exception(f"Image scan execution failed: {str(e)}")
         raise HTTPException(
             status_code=500,
-            detail=f"Scan execution failed: {str(e)}"
+            detail=f"Image scan execution failed: {str(e)}"
         )
 
 
@@ -175,10 +185,15 @@ def get_scan_progress(
 def create_scan_detail(
     scan_id: int,
     payload: ImageScanDetailCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user)
 ):
+    now = datetime.utcnow()
+
     detail = ImageScanDetail(
         image_scan_id=scan_id,
+        created_by=user.id,
+        created_at=now,
         **payload.dict()
     )
     db.add(detail)
@@ -193,7 +208,8 @@ def list_scan_details(
     size: int = 10,
     search: str | None = None,
     status: str | None = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user)
 ):
     
     severity_order = case(

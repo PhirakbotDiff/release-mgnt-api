@@ -1,6 +1,9 @@
-from fastapi import FastAPI # type: ignore
+from fastapi import FastAPI, Request # type: ignore
 from fastapi.middleware.cors import CORSMiddleware # type: ignore
 from contextlib import asynccontextmanager
+
+import time
+import logging
 
 from app.auth.security import init_default_user
 from app.auth.init_db import create_tables
@@ -42,6 +45,32 @@ app.add_middleware(
     allow_methods=["*"],                               # Allow GET, POST, PUT, DELETE, etc.
     allow_headers=["*"],                               # Allow all headers (Authorization, Content-Type, etc.)
 )
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("api")
+
+@app.middleware("http")
+async def log_requests(
+    request: Request, 
+    call_next
+):
+    start_time = time.time()
+
+    response = await call_next(request)
+
+    user = request.state.user if hasattr(request.state, "user") else None
+
+    process_time = time.time() - start_time
+    logger.info(
+        "%s %s - %s (%.2f ms) user=%s",
+        request.method,
+        request.url.path,
+        response.status_code,
+        process_time * 1000,
+        "%s %s" % (user.firstname, user.lastname) if user else "anonymous",
+    )
+
+    return response
 
 app.include_router(deploy_router)
 app.include_router(auth_router)
