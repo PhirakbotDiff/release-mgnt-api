@@ -1,5 +1,5 @@
 stages:
-  # - build
+  - build
   - deploy
 
 # Only run pipeline for version tags
@@ -13,33 +13,33 @@ variables:
   REG_HOST: $REGISTRY_HOST
   REG_USERNAME: $REGISTRY_USERNAME
 
-# build:
-#   stage: build
-#   image: docker:latest
-#   services:
-#     - name: docker:dind
-#       command: ["--tls=false", "--insecure-registry=10.20.10.117:5000"]
-#   variables:
-#     DOCKER_HOST: tcp://docker:2375
-#     DOCKER_TLS_CERTDIR: ""
-#     DOCKER_TLS_VERIFY: ""
-#     IMAGE_NAME: "$REG_HOST/$BE_IMAGE_NAME"
-#   before_script:
-#     - docker version
-#     - echo "Logging into private registry..."
-#     - echo "Host Name $REG_HOST $REGISTRY_HOST $REG_USERNAME $REGISTRY_USERNAME"
-#     - echo "$REG_PWD" | docker login $REG_HOST -u "$REG_USERNAME" --password-stdin
-#   script:
-#     - echo "Building Docker images..."
-#     - docker build -t $IMAGE_NAME:$IMAGE_TAG .
-#     - docker build -t $IMAGE_NAME:latest .
-#     - echo "Pushing images to registry..."
-#     - docker push $IMAGE_NAME:$IMAGE_TAG
-#     - docker push $IMAGE_NAME:latest
-#     - echo "Build and push completed successfully"
-#     - echo "IMAGE_URL=$IMAGE_NAME:$IMAGE_TAG"
-#   rules:
-#     - if: $CI_COMMIT_TAG
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - name: docker:dind
+      command: ["--tls=false", "--insecure-registry=10.20.10.117:5000"]
+  variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_TLS_VERIFY: ""
+    IMAGE_NAME: "$REG_HOST/$BE_IMAGE_NAME"
+  before_script:
+    - docker version
+    - echo "Logging into private registry..."
+    - echo "Host Name $REG_HOST $REGISTRY_HOST $REG_USERNAME $REGISTRY_USERNAME"
+    - echo "$REG_PWD" | docker login $REG_HOST -u "$REG_USERNAME" --password-stdin
+  script:
+    - echo "Building Docker images..."
+    - docker build -t $IMAGE_NAME:$IMAGE_TAG .
+    - docker build -t $IMAGE_NAME:latest .
+    - echo "Pushing images to registry..."
+    - docker push $IMAGE_NAME:$IMAGE_TAG
+    - docker push $IMAGE_NAME:latest
+    - echo "Build and push completed successfully"
+    - echo "IMAGE_URL=$IMAGE_NAME:$IMAGE_TAG"
+  rules:
+    - if: $CI_COMMIT_TAG
 
 deploy:
   stage: deploy
