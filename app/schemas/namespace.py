@@ -17,12 +17,6 @@ class NamespaceUpdate(NamespaceBase):
 class Namespace(NamespaceBase):
     id: int
 
-    model_config = ConfigDict(from_attributes=True)
-
-class NamespaceLOV(NamespaceBase):
-    id: int
-    slug: str
-
     created_at: str | datetime | None
     created_by: str | int | None
     created_position: str | None = None
@@ -35,6 +29,12 @@ class NamespaceLOV(NamespaceBase):
     @field_serializer("updated_at", check_fields=False)
     def serialize_updated_at(self, v: datetime) -> str:
         return v.strftime("%d %b, %Y")
+
+    model_config = ConfigDict(from_attributes=True)
+
+class NamespaceLOV(NamespaceBase):
+    id: int
+    slug: str
     
     # This allows Pydantic to read data from SQLAlchemy models (ORM)
     model_config = ConfigDict(from_attributes=True)

@@ -52,6 +52,8 @@ def create_service(
             medium=0,
             low=0,
             namespace=service.namespace,
+            created_at = now,
+            created_by=current_user.id,
         )
         db.add(db_image)
 

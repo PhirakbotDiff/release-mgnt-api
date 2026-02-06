@@ -62,10 +62,27 @@ def get_namespace(
     current_user: User = Depends(get_current_user)
 ):
     """Fetch a specific namepsace by its ID."""
-    db_env = db.query(NamespaceModel).filter(NamespaceModel.id == ns_id).first()
-    if not db_env:
+    ns_obj = db.query(
+            NamespaceModel,
+            User,
+        ).\
+        join(User, NamespaceModel.created_by == User.id).\
+        filter(NamespaceModel.id == ns_id).first()
+
+    if not ns_obj:
         raise HTTPException(status_code=404, detail="Namepsace not found")
-    return db_env
+    
+    dict_data = {
+        "id": ns_obj[0].id,
+        "name": ns_obj[0].name,
+        "description": ns_obj[0].description,
+        "created_by": "%s %s" % (ns_obj[1].firstname, ns_obj[1].lastname),
+        "created_at": ns_obj[1].created_at,
+        "created_position": ns_obj[1].role,
+        "updated_at": ns_obj[1].updated_at
+    }
+
+    return dict_data
 
 
 @router.delete("/{ns_id}", status_code=status.HTTP_204_NO_CONTENT)

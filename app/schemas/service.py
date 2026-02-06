@@ -10,10 +10,6 @@ class ServiceBase(BaseModel):
     manifest_path: Optional[str] = None
     gitlab_url: Optional[str] | None = None
     namespace: Optional[str] = None
-    created_at: str | datetime | None
-    created_by: str | int | None
-    created_position: str | None = None
-    updated_at: str | datetime | None = None
 
 # Properties to receive on service creation
 class ServiceCreate(ServiceBase):
@@ -26,6 +22,10 @@ class ServiceUpdate(ServiceBase):
 class Service(ServiceBase):
     id: int
     slug: str
+    created_at: str | datetime | None
+    created_by: str | int | None
+    created_position: str | None = None
+    updated_at: str | datetime | None = None
 
     image: dict | None = {}
     
