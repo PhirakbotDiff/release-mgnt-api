@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     DB_PWD: str = "postgres"
 
     TRIVY_SERVER: str = "http://127.0.0.1:4954"
+    TRIVY_CONFIG: str = "/Users/phirakbot/trivy/docker/config.json"
 
     class Config:
         env_file = ".env"

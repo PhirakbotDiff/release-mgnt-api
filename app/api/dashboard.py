@@ -42,9 +42,9 @@ def get_dashboard(
         .scalar()
     )
 
-    services_pct, services_trend = calc_percentage(
-        services_this_month, services_last_month
-    )
+    # services_pct, services_trend = calc_percentage(
+    #     services_this_month, services_last_month
+    # )
 
     services_pct = services_last_month - services_this_month
 
@@ -68,7 +68,7 @@ def get_dashboard(
         .scalar()
     )
 
-    deployments_pct = 0 if deployments_this_month == 0 else deployments_this_month - deployments_last_month
+    deployments_pct = deployments_last_month - deployments_this_month
     # deployments_pct, deployments_trend = calc_percentage(
     #     deployments_this_month, deployments_last_month
     # )
@@ -92,14 +92,14 @@ def get_dashboard(
     return {
         "services": {
             "total": services_total,
-            "percentage": services_pct,
-            "type": "down" if services_pct == 0 else "up",
+            "percentage": services_this_month,
+            "type": "down" if services_pct <= 0 else "up",
             # "type": services_trend, hide temporary
         },
         "deployments": {
             "total": deployments_total,
-            "percentage": deployments_pct,
-            "type": "down" if deployments_pct == 0 else "up",
+            "percentage": deployments_this_month,
+            "type": "down" if deployments_pct <= 0 else "up",
         },
         "monthlyData": monthly_data,
     }

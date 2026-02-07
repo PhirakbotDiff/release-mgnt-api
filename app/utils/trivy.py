@@ -1,13 +1,16 @@
 import json
 import subprocess
+import os
+import logging
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from app.config import settings
-import logging
 
 
 logger = logging.getLogger("api")
 
+docker_config = settings.TRIVY_CONFIG
 
 def run_trivy(
     image: str, 
@@ -15,12 +18,27 @@ def run_trivy(
     insecure: bool = True
 ) -> dict:
     
+    # this used for run os host
+    # cmd = [
+    #     "trivy",
+    #     "image",
+    #     "--server", settings.TRIVY_SERVER,
+    #     "--format", "json",
+    #     "--severity", ",".join(severities),
+    # ]
+
     cmd = [
-        "trivy",
+        "docker", "run", "--rm",
+        "-v", f"{docker_config}:/root/.docker/config.json:ro",
+        "-v", "/var/run/docker.sock:/var/run/docker.sock",
+        "aquasec/trivy:latest",
         "image",
-        "--server", settings.TRIVY_SERVER,
-        "--format", "json",
-        "--severity", ",".join(severities),
+        # settings.TRIVY_SERVER,
+        "--ignore-unfixed",
+        "--format", 
+        "json",
+        "--severity", 
+        ",".join(severities)
     ]
 
     if insecure:
@@ -35,6 +53,7 @@ def run_trivy(
             text=True,
             timeout=600
         )
+        logger.info("Trivy scan success")
     except subprocess.TimeoutExpired:
         logger.exception("Trivy scan timed out")
         raise HTTPException(

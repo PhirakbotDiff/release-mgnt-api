@@ -30,17 +30,17 @@ def run_scan_task(
         scan.message = "Starting scan"
         db.commit()
 
-        # Run Trivy
-        scan.progress = 30
-        scan.message = "Pulling image"
-        db.commit()
-
         # convert current image_current to this format
         # 10.20.10.117:5000/product-service-mul:latest
         # Query to get slug-name of service
         image_obj = db.query(Image).filter(Image.id == payload.image_id).first()
         if not image_obj:
             raise HTTPException(status_code=404, detail="Image not found")
+        
+        # Run Trivy
+        scan.progress = 30
+        scan.message = "Pulling image"
+        db.commit()
         
         service_slug = image_obj.service_id
         image_full_path = f"{settings.IMAGE_REGISTRY_URL}/{service_slug}:{payload.image_current}"

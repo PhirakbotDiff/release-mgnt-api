@@ -143,7 +143,10 @@ def execute_scan(
         return {
             "scan_id": scan.id,
             "status": scan.status,
-            "progress": scan.progress
+            "progress": scan.progress,
+            "position": user.role,
+            "scanned_by": "%s %s" % (user.firstname, user.lastname),
+            "created_at": now.strftime("%d %b, %Y")
         }
 
     except Exception as e:
