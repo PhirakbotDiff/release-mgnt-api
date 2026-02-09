@@ -9,8 +9,17 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 # System dependencies (optional but useful)
-RUN apt-get update && apt-get install -y -y curl \
-    && apt-get install -y --no-install-recommends libexpat1 \
+# RUN apt-get update && apt-get install -y -y curl \
+#     && apt-get install -y --no-install-recommends libexpat1 \
+#     build-essential \
+#     git \
+#     && curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh \
+#     && apt-get clean \
+#     && rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    libexpat1 \
     build-essential \
     git \
     && curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh \
