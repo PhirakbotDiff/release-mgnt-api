@@ -3,6 +3,9 @@ import urllib.parse
 import base64
 from app.config import settings
 import os
+import logging
+
+logger = logging.getLogger("api")
 
 author = Actor(
     name=settings.GIT_AUTHOR_NAME,
@@ -24,7 +27,6 @@ class GitService:
         }
             
         if not os.path.exists(self.repo_path):
-            print("in right")
             return Repo.clone_from(
                 self.repo_url,
                 self.repo_path,
@@ -54,8 +56,10 @@ class GitService:
             push_info = repo.remotes.origin.push()
             for info in push_info:
                 if info.flags & info.ERROR:
+                    logger.exception(f"Push failed: {info.summary}")
                     raise Exception(f"Push failed: {info.summary}")
         except Exception as e:
+            logger.exception(f"Push error: {str(e)}")
             print(f"Push error: {e}")
         
         return commit.hexsha

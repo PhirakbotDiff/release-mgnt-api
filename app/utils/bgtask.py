@@ -1,11 +1,13 @@
-
-from app.auth.security import get_current_user
 from app.database import SessionLocal
 from app.services.git_service import GitService
 from app.services.manifest_service import ManifestService
 from app.config import settings
-
 from app.models.deploy import Deployment
+
+import logging
+
+logger = logging.getLogger("api")
+
 
 def run_deploy_job(
     deployment_id: int,
@@ -42,11 +44,16 @@ def run_deploy_job(
 
         db.commit()
 
+        logger.info(f"✅ Deploy successful — commit #{str(commit_id)}.")
+
     except Exception as e:
+
         deployment = db.query(Deployment).get(deployment_id)
         deployment.status = "FAILED"
         deployment.error_message = str(e)
         db.commit()
+
+        logger.exception(f"Deploy failed. {str(e)}")
 
     finally:
         db.close()
