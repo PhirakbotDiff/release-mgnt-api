@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 # Prevent Python from writing .pyc files
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -9,9 +9,12 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 # System dependencies (optional but useful)
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y -y curl \
+    && apt-get install -y --no-install-recommends libexpat1 \
     build-essential \
     git \
+    && curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
