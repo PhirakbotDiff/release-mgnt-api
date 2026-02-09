@@ -7,6 +7,7 @@ from app.models.service import Service
 from app.models.deploy import Deployment
 from app.schemas.dashboard import DashboardStats
 from datetime import datetime, timedelta
+from app.logics.dashboard import get_top_deployment
 from app.utils.tools import calc_percentage
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard Stats"])
@@ -110,20 +111,8 @@ def top_deployments(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    last_30_days = datetime.utcnow() - timedelta(days=30)
 
-    # Count deployments per service (last 30 days)
-    rows = (
-        db.query(
-            Deployment.service,
-            func.count(Deployment.id).label("count")
-        )
-        .filter(Deployment.created_at >= last_30_days)
-        .group_by(Deployment.service)
-        .order_by(func.count(Deployment.id).desc())
-        .limit(4)
-        .all()
-    )
+    rows = get_top_deployment(db)
 
     if not rows:
         return []
