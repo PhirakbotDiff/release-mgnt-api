@@ -19,27 +19,32 @@ def run_trivy(
 ) -> dict:
     
     # this used for run os host
-    # cmd = [
-    #     "trivy",
-    #     "image",
-    #     "--server", settings.TRIVY_SERVER,
-    #     "--format", "json",
-    #     "--severity", ",".join(severities),
-    # ]
-
     cmd = [
-        "docker", "run", "--rm",
-        "-v", f"{docker_config}:/root/.docker/config.json:ro",
-        "-v", "/var/run/docker.sock:/var/run/docker.sock",
-        "aquasec/trivy:latest",
+        "trivy",
         "image",
-        # settings.TRIVY_SERVER,
-        "--ignore-unfixed",
+        "--server", 
+        settings.TRIVY_SERVER,
         "--format", 
+        # "--username", settings.IMAGE_REGISTRY_USERNAME,
+        # "--password", settings.IMAGE_REGISTRY_PASSWORD,
         "json",
+        "--ignore-unfixed",
         "--severity", 
-        ",".join(severities)
+        ",".join(severities),
     ]
+
+    # cmd = [
+    #     "docker", "run", "--rm",
+    #     "-v", f"{docker_config}:/root/.docker/config.json:ro",
+    #     "-v", "/var/run/docker.sock:/var/run/docker.sock",
+    #     "aquasec/trivy:latest",
+    #     "image",
+    #     "--ignore-unfixed",
+    #     "--format", 
+    #     "json",
+    #     "--severity", 
+    #     ",".join(severities)
+    # ]
 
     if insecure:
         cmd.append("--insecure")
