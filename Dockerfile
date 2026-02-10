@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 # System dependencies (optional but useful)
-# RUN apt-get update && apt-get install -y -y curl \
+# RUN apt-get update && apt-get install -y curl \
 #     && apt-get install -y --no-install-recommends libexpat1 \
 #     build-essential \
 #     git \
@@ -17,12 +17,15 @@ WORKDIR /app
 #     && apt-get clean \
 #     && rm -rf /var/lib/apt/lists/*
 
+
 RUN apt-get update && apt-get install -y \
     curl \
-    libexpat1 \
-    build-essential \
     git \
-    && curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh \
+    libexpat1 \
+    ca-certificates \
+    && curl -L https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.69.1_Linux-ARM64.tar.gz \
+    | tar zx -C /usr/local/bin trivy \
+    && chmod +x /usr/local/bin/trivy \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
