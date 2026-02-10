@@ -3,8 +3,8 @@ from pydantic_settings import BaseSettings # type: ignore
 class Settings(BaseSettings):
     MANIFEST_REPO_URL: str
     MANIFEST_REPO_BRANCH: str = "main"
-    # MANIFEST_LOCAL_PATH: str = "../repos/manifest_repo"
-    MANIFEST_LOCAL_PATH: str = "https://gitscm-uat.vattanacbrewery.com/devops/manifest_repo"
+    # MANIFEST_LOCAL_PATH: str = "https://gitscm-uat.vattanacbrewery.com/devops/manifest_repo"
+    MANIFEST_LOCAL_PATH: str = "repos"
     GIT_TOKEN: str
     GIT_USERNAME: str
     GIT_AUTHOR_NAME: str = "phirakbot"

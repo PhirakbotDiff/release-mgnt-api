@@ -34,8 +34,9 @@ class GitService:
                 env=custom_env
             )
 
+        logging.info(f"self.repo_path {self.repo_path}")
         repo = Repo(self.repo_path)
-        repo.remotes.origin.set_url(self.repo_path)
+        repo.remotes.origin.set_url(self.repo_url)
         repo.remotes.origin.pull()
         
         return repo
