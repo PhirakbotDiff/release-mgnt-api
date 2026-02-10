@@ -21,12 +21,16 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     curl \
     git \
-    libexpat1 \
     ca-certificates \
-    && curl -L https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.69.1_Linux-ARM64.tar.gz \
-    | tar zx -C /usr/local/bin trivy \
+    && ARCH="$(uname -m)" \
+    && case "$ARCH" in \
+      x86_64)  TRIVY_ARCH="64bit" ;; \
+      aarch64) TRIVY_ARCH="ARM64" ;; \
+      *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
+    esac \
+    && curl -L "https://github.com/aquasecurity/trivy/releases/latest/download/trivy_0.69.1_Linux-${TRIVY_ARCH}.tar.gz" \
+        | tar zx -C /usr/local/bin trivy \
     && chmod +x /usr/local/bin/trivy \
-    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
