@@ -145,8 +145,13 @@ def get_deployment_by_id(
     current_user=Depends(get_current_user)
 ):
     deployment = (
-        db.query(DeploymentModel, User)
+        db.query(
+            DeploymentModel, 
+            User,
+            ServiceModel
+        )
         .join(User, DeploymentModel.created_by == User.id)
+        .join(ServiceModel, DeploymentModel.service == ServiceModel.slug)
         .filter(DeploymentModel.id == int(deploy_id))
         .first()
     )
@@ -160,7 +165,7 @@ def get_deployment_by_id(
     # for deploy, user in deployment:
     dict_data = {
         "id": deployment[0].id,
-        "service": deployment[0].service,
+        "service": deployment[2].name or deployment[0].service,
         "environment": deployment[0].environment,
         "image_tag": deployment[0].image_tag, 
         "git_tag": deployment[0].git_tag,

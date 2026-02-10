@@ -3,8 +3,7 @@ import subprocess
 import os
 import logging
 
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
+from fastapi import HTTPException
 from app.config import settings
 
 
@@ -22,11 +21,10 @@ def run_trivy(
     cmd = [
         "trivy",
         "image",
-        "--server", 
-        settings.TRIVY_SERVER,
+        "--server", settings.TRIVY_SERVER,
+        "--username", settings.IMAGE_REGISTRY_USERNAME,
+        "--password", settings.IMAGE_REGISTRY_PASSWORD,
         "--format", 
-        # "--username", settings.IMAGE_REGISTRY_USERNAME,
-        # "--password", settings.IMAGE_REGISTRY_PASSWORD,
         "json",
         "--ignore-unfixed",
         "--severity", 
