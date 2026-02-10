@@ -1,6 +1,10 @@
 import yaml # type: ignore
 from pathlib import Path
 
+import logging
+
+logger = logging.getLogger("api")
+
 ALLOWED_BASE_PATH = "./manifest-repo/charts"
 
 class ManifestService:
@@ -15,6 +19,7 @@ class ManifestService:
     ):
 
         repo_root = Path(manifest_repo_path)
+        logger.info(f"manifest_repo_path: {manifest_repo_path}")
         file_path = Path(
             f"{repo_root}/{manifest_path}/values.yaml"
         )
