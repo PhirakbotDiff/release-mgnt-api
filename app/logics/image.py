@@ -94,6 +94,10 @@ def run_scan_task(
                 Image.latest_version_scan: payload.image_current,
                 Image.status: status,
                 Image.updated_at: now,
+                Image.critical: summary["CRITICAL"],
+                Image.high: summary["HIGH"],
+                Image.medium: summary["MEDIUM"],
+                Image.low: summary["LOW"],
             })
 
         db.commit()
