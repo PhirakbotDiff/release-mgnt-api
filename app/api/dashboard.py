@@ -94,13 +94,13 @@ def get_dashboard(
         "services": {
             "total": services_total,
             "percentage": services_this_month,
-            "type": "down" if services_pct <= 0 else "up",
+            "type": "down" if services_pct <= 0 and services_last_month > services_this_month else "up",
             # "type": services_trend, hide temporary
         },
         "deployments": {
             "total": deployments_total,
             "percentage": deployments_this_month,
-            "type": "down" if deployments_pct <= 0 else "up",
+            "type": "down" if deployments_pct <= 0 and deployments_last_month > deployments_this_month else "up",
         },
         "monthlyData": monthly_data,
     }
